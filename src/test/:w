@@ -4,15 +4,11 @@
 int main() {
 	engine.init();
 
-	engine_vector position = engine.vector.init();
-
-	engine.vector.set(&position, 1, (void *)"testing");
+	engine_vector engine.vector.init();
 
 	engine.sleep(1);
 	engine.debug("hello engine 0");
 	engine.sleep(1);
-	
-	engine.vector.free(&position);
 
 	engine.exit();
 }

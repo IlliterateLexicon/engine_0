@@ -6,8 +6,8 @@ local shared_object = "engine.so"
 local header_dir = "inc/"
 local header = "engine.h"
 
-local test_source = "test.c"
 local test_dir = "src/test/"
+local test_source = "test.c"
 local test_executable = "test"
 local test_script = "test.lua"
 
@@ -77,7 +77,7 @@ local compiler_flags =
 		end
 
 	-- test:
-		function make_ctest()
+		function make_test()
 			make_lib()
 
 			io.write("compileing c test: \n")
@@ -97,14 +97,14 @@ local compiler_flags =
 				);
 		end
 		
-		function make_test()
+		--[[ function make_test()
 			make_lib()
 			
 			io.write("running lua test: \n")
 				run_command( "export LUA_CPATH=\""..os.getenv("PWD").."/%s?.so\";lua5.4 %s%s",
 					build_dir, test_dir, test_script
 				)
-		end
+		]]--end
 
 	-- lib:
 		function make_lib()

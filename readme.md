@@ -1,37 +1,31 @@
 # engine_0
-### a game engine written in c heavily utilizeing the lua capi
+### a game engine written in c and lua
 
 ## compile the project
 to compile simply run the following commands
 ```bash
 	git clone https://github.com/illiterateLexicon/engine_0
 	cd engine_0	
-	lua make test
-```
-
-or this combinded command
-```bash
-	git clone https://github.com/illiterateLexicon/engine_0; cd engine_0; lua make test
+	lua make lib 
 ```
 
 ## how to use 
-### LuaAPI
-```lua
-	-- replace './' with the folder containing the shared object file (possibly engine_0/build)
-	package.cpath = package.cpath .. ";;./?.so"
 
-	local engine = require("engine_0") -- require the engine table
-	
-	engine.init() -- initalize the engine 
-	engine.exit() -- exit the engine
-```
+### NOTE
+the capi is what is being made first the lua api will then be wrapped around the capi
 
 ### CAPI
 ```c
+	// load declarations
 	#include "engine_0.h" // load the definitions 
 		
 	int main() {
 		engine.init();
+		
+		engine.sleep(1);
+		engine.debug("hello engine 0");
+		engine.sleep(1);
+
 		engine.exit();
 	}
 ```

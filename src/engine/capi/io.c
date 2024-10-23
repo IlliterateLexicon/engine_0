@@ -1,4 +1,3 @@
-
 void engine_debug(const char * message) {
 	printf("\033[1mengine.\033[34mdebug\033[0m: \033[2m%s\033[0m\n", message);
 	fflush(stdout);

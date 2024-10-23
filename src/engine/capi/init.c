@@ -1,5 +1,6 @@
 #include "io.c"
 #include "sleep.c"
+#include "vector.c"
 
 // engine.init() 
 	void engine_init() { 
