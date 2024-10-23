@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
-
+#include <stdarg.h>
+#include <stdbool.h>
 #include <math.h>
 #include <time.h>
 
@@ -15,12 +16,13 @@
 		void engine_exit();
 
 	// io 
-		void engine_debug();
-		void engine_warning();
-		void engine_error();
+		void engine_debug(const char *, ...);
+		void engine_warning(const char *, ...);
+		void engine_error(const char *, ...);
+		void engine_assert(bool, const char *, ...);
 
 	// sleep
-		void engine_sleep();
+		void engine_sleep(long double);
 
 	// vector
 		// declare engine_vector type
@@ -31,15 +33,15 @@
 			} engine_vector;
 		
 		// declare vector methods
-			engine_vector engine_vector_init();
-			void engine_vector_free(engine_vector *);
+			engine_vector engine_vector_init(); // allocate new vector
+			void engine_vector_free(engine_vector *); // unallocate vector
+			void engine_vector_resize(engine_vector *, int); // reallocate vector
 		
-			void		engine_vector_set(engine_vector *, int, void *);
-			void *	engine_vector_get(engine_vector *, int);
-			void *	engine_vector_del(engine_vector *);
-			void		engine_vector_add(engine_vector *, int);
-			void *	engine_vector_sub(engine_vector *, void *);
-			size_t	engine_vector_len(engine_vector *);
+			void		engine_vector_set(engine_vector *, int, void *); // set index, increase size if index doesnt exist
+			void *	engine_vector_get(engine_vector *, int); // get index return NULL if index doesnt exist
+			void  	engine_vector_add(engine_vector *, void *); // get index return NULL if index doesnt exist
+			void *	engine_vector_sub(engine_vector *); // set index, increase size if index doesnt exist
+			size_t	engine_vector_len(engine_vector *); // return current highest index (that has a value)
 	
 // struct declaration (engine)
 	// engine.vector struct declaration
@@ -47,21 +49,21 @@
 			engine_vector (*init)();											// create engine_vector
 			void		(*free)(engine_vector *);							// free allocated mem
 			void		(*set)(engine_vector *, int, void *); // set index
-			void *	(*get)(engine_vector *, int, void *); // get index and return
-			void *	(*pop)(engine_vector *, int);					// get index and remove
-			void		(*add)(engine_vector *, void *);			// add to end
-			void *	(*sub)(engine_vector *, void *);			// remove from end
+			void *	(*get)(engine_vector *, int);					// get index and return
+			void		(*add)(engine_vector *, void *); // add to end of vector
+			void *	(*sub)(engine_vector *);					// remove from end of vector 
+			size_t	(*len)(engine_vector *);							// return highest set index
 		};
-			
 
 	// engine struct declaration 
 		struct engine {
 			void (*init)();
 			void (*exit)();
 
-			void (*debug)(const char * message);
-			void (*warning)(const char * message);
-			void (*error)(const char * message);
+			void (*debug)(const char *, ...);
+			void (*error)(const char *, ...);
+			void (*warning)(const char *, ...);
+			void (*assert)(bool, const char *, ...);
 
 			void (*sleep)(long double seconds);
 			struct vector vector;
@@ -71,7 +73,13 @@
 	// vector initalization
 		const struct vector engine_vector_struct = {
 			.init = engine_vector_init,
-			.free = engine_vector_free
+			.free = engine_vector_free,
+
+			.set = engine_vector_set,
+			.get = engine_vector_get,
+			.add = engine_vector_add,
+			.sub = engine_vector_sub,
+			.len = engine_vector_len
 		};
 
 	// engine initalization	

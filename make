@@ -151,3 +151,4 @@ local compiler_flags =
 		assert(case[argument], "\"" .. argument .. "\" is not a valid target.")
 		case[argument]()
 	end
+
