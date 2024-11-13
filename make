@@ -109,6 +109,7 @@ require("lib.lmake")
 			task("making commit")
 				cmd("git add --all")
 				cmd("git commit -m \"%s\"", msg)
+				cmd("git push origin main")
 			task_done()
 		end
 
