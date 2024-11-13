@@ -1,154 +1,116 @@
 #! /bin/lua5.4
 
-local build_dir = "build/"
-local shared_object = "engine.so"
+require("lib.lmake")
 
-local header_dir = "inc/"
-local header = "engine.h"
-
-local test_dir = "src/test/"
-local test_source = "test.c"
-local test_executable = "test"
-local test_script = "test.lua"
-
-local compiler = "gcc"
-local compiler_libs = 
-	" -ldl"..
-	" -llua"..
-	" -lepoxy"..
-	" -lglfw"
-local compiler_flags =
-	" -shared"..
-	" -fPIC"..
-	" -I"..header_dir
-
--- file size
-	function fsize(file)
-		local position = file:seek()
-		local size = file:seek("end")
-		file:seek("set", position)
-		return size
-	end
+-- set vars
+	-- directories
+		src_dir = "./src"
+		build_dir = "./build/"
+		test_dir = src_dir .."/test/"
 	
-	function toend(file)
-		return fsize(file) - file:seek()
-	end
+	-- files
+		lib = build_dir .. "libengine_0.so"
+		header = build_dir .. "engine_0.h"
+		test = test_dir .. "init.c"
+		test_executable = build_dir .. "test"
+		test_lib = "libengine_0.so"
 
--- run command
-	function run_command(format, ...)
-		local cmd_str = string.format(format, ...)
-
-		-- clear files
-		io.open("/tmp/stdout", "w+"):close()
-		io.open("/tmp/stderr", "w+"):close()
-	
-		-- get std handles
-		local stdout = io.open("/tmp/stdout", "r")
-		local stderr = io.open("/tmp/stderr", "r")
-
-		-- run command 
-		local cmd = io.popen(cmd_str .. " >> /tmp/stdout && echo -en LUA_MAKE_COMMAND_DONE >> /tmp/stderr")
-		local error = "";
-
-		-- read from files
-			local exiting = false
-			while true do
-				if toend(stdout) > 0 then
-					io.write(stdout:read(exiting and "*a" or  1))
-				end
-			
-				if toend(stderr) > 0 then
-					error = error .. stderr:read(exiting and "*a" or  1)
-				end
-
-				-- if exiting read rest of file and exit
-				if exiting then break end
-				exiting = (error == "LUA_MAKE_COMMAND_DONE")
-			end
+	-- compiler
+		compiler = "gcc"
 		
-		stdout:close()
-		stderr:close()
-	end
+		compiler_flags =
+			" -shared" ..
+			" -fPIC" ..
+			" -I".. build_dir
 
--- define targets
-	-- build:
-		function make_build(cmd_fmt, ... )
-			os.execute(string.format("[ -d %s ] || mkdir %s", build_dir, build_dir))
+		compiler_libs = "-lm"
+
+		compiler_test_flags =
+			" -I" .. build_dir ..
+			" -L" .. build_dir 
+
+		compiler_test_libs =
+			compiler_libs .. 
+			" -l:" .. test_lib
+
+-- targets
+	-- build dir
+		function make_build_dir()
+			cmd("[ -d %s ] || mkdir %s", build_dir, build_dir)
 		end
 
-	-- test:
-		function make_test()
-			make_lib()
+	-- header
+		function make_header()
+			make_build_dir()
 
-			io.write("compileing c test: \n")
-				run_command( "gcc -Iinc -L%s -l:%s %s %s%s -o %s%s",
-					build_dir, 
-					shared_object,
-					compiler_libs,
-					test_dir, test_source,
-					build_dir, test_executable
-				);
+			task("makeing header")
+				-- parse depencies in plain text
+					cmd("cat %s/init.h | sed -n '/#ifdef DEPENDENCIES/,/#else/{/#ifdef DEPENDENCIES/b;/#else/b;p}' | tr -d '\t' > %s",
+						src_dir, header
+					)	
 
-			io.write("running c test: \n")
-				run_command("export LD_LIBRARY_PATH="..os.getenv("PWD").."/%s; %s./%s",
-						build_dir, 
-						build_dir, 
-						test_executable 
-				);
+				-- get header content from all files
+					cmd("%s -E -P -x c src/init.h -o /dev/stdout | awk '{$1=$1};1' >> %s",
+						compiler, header
+					)	
+			task_done()
 		end
-		
-		--[[ function make_test()
-			make_lib()
-			
-			io.write("running lua test: \n")
-				run_command( "export LUA_CPATH=\""..os.getenv("PWD").."/%s?.so\";lua5.4 %s%s",
-					build_dir, test_dir, test_script
-				)
-		]]--end
 
-	-- lib:
+	-- lib
 		function make_lib()
-			make_build()
-			
-			-- get modules
+			make_build_dir()
+			make_header()
+
+			-- get modules (folders in src dir)
 				modules = "" -- src/*/
-				for dir in io.popen("ls -d src/*/"):lines() do 
+				for dir in io.popen("ls -d ".. src_dir .."*/"):lines() do 
 					if dir == test_dir then goto done end
 					modules = modules .. string.format("%sinit.c ", dir)
 					::done::
 				end
 
-			io.write("compileing shared object: \n")
-				run_command( "%s %s %s -o %s%s %s",
-					compiler, compiler_libs, compiler_flags, build_dir, shared_object, modules
+			task("compileing shared object")
+				cmd("%s %s %s -o %s %s",
+					compiler, compiler_flags, compiler_libs, lib, modules
+				)	
+			task_done()
+		end
+
+	-- test
+		function make_test()
+			make_lib()
+			task("compileing test")
+				cmd("%s %s %s -o %s %s",
+					compiler, compiler_test_flags, compiler_test_libs, test_executable, test
 				)
+			task_done()
+					
+			io.write("running test: \n")
+			cmd("export LD_LIBRARY_PATH=%s/%s; %s", 
+				os.getenv("PWD"),
+				build_dir,
+				test_executable
+			)
 		end
 
-	-- clean:
+	-- clean
 		function make_clean()
-			print("cleaning build dir: \n")
-			os.execute(string.format("rm -dr %s", build_dir))
-			make_build()
-			make_test()
+			task("cleaning build dir")
+				cmd("[ -d %s ] && rm -dr %s",
+				build_dir, build_dir
+				)
+			task_done()
 		end
 
--- identify targets
-	case = {}
-	for k,v in pairs(_G) do
-		if type(v) == "function" and k:sub(1,5) == "make_" then
-			case[k:sub(6)] = v
+	-- git
+		function make_git()
+			io.write("input commit message: ")
+			local msg = io.read()
+			task("making commit")
+				cmd("git add --all")
+				cmd("git commit -m \"%s\"", msg)
+			task_done()
 		end
-	end
 
--- parse arguments
-	local target_string = ""
-	for k,v in pairs(case) do
-		target_string = target_string .. "\n\t\t".. k
-	end
-
-	assert(#arg>0, "no targets passed.\n\tplease pass one of the following targets" .. target_string)
-	for i,argument in ipairs(arg) do
-		assert(case[argument], "\"" .. argument .. "\" is not a valid target.")
-		case[argument]()
-	end
-
+	-- make default target 
+		make_default = make_lib
