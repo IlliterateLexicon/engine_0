@@ -9,11 +9,11 @@ require("lib.lmake")
 		test_dir = src_dir .."/test/"
 	
 	-- files
-		lib = build_dir .. "libengine_0.so"
+		lib = build_dir .. "engine_0.so"
 		header = build_dir .. "engine_0.h"
 		test = test_dir .. "init.c"
 		test_executable = build_dir .. "test"
-		test_lib = "libengine_0.so"
+		test_lib = "engine_0.so"
 
 	-- compiler
 		compiler = "gcc"
