@@ -1,6 +1,6 @@
 #! /bin/lua5.4
 
-require("lib.lmake")
+require("lib.make")
 
 -- set vars
 	-- directories

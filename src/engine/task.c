@@ -28,7 +28,8 @@
 		if ( ! engine.tasks.allocated ) { engine.vector.alloc(&engine.tasks); }
 		engine_task_indent();
 		engine.vector.add(&engine.tasks, task_name);
-		printf("\033[1mengine.\033[35mtask\033[0m: %s\n", task_name);
+		fprintf(stdout, "\033[1mengine.\033[35mtask\033[0m: %s\n", task_name);
+		fflush(stdout);
 	}
 	
 	void engine_task_done() {

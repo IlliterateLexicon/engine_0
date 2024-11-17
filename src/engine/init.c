@@ -48,6 +48,7 @@
 			engine.task("initalizing opengl");
 			engine.task_done();
 		engine.task_done();
+		engine.tick();
 	}
 	
 	void engine_exit() {
