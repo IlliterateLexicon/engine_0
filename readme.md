@@ -1,20 +1,20 @@
 # engine_0
 ### a game engine written in c and lua
 
-## compile the project
-to compile simply run the following commands
+## dependencies
+	'''bash
+		c lua5.4 gcc
+	'''
+
+## compile and test the project
+to compile and test run the following in a bash terminal
 ```bash
-	git clone https://github.com/illiterateLexicon/engine_0
+	git clone --recursive https://github.com/illiterateLexicon/engine_0
 	cd engine_0	
-	lua make lib 
+	lua make test
 ```
 
-## how to use 
-
-### NOTE
-the capi is what is being made first the lua api will then be wrapped around the capi
-
-### CAPI
+### Then  
 ```c
 	// load declarations
 	#include "engine_0.h" // load the definitions 

@@ -45,6 +45,7 @@
 	
 	void engine_init() {
 		engine.task("initalizing engine");
+			engine.sleep(1);
 			engine.task("initalizing opengl");
 			engine.task_done();
 		engine.task_done();
