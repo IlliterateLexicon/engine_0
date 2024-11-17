@@ -2,9 +2,9 @@
 ### a game engine written in c and lua
 
 ## dependencies
-	'''bash
+	```
 		c lua5.4 gcc
-	'''
+	```	
 
 ## compile and test the project
 to compile and test run the following in a bash terminal
