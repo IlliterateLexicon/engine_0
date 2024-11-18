@@ -108,8 +108,7 @@ require("lib.make")
 			local msg = io.read()
 			task("making commit")
 				cmd("git add --all")
-				cmd("git commit -m \"%s\"", msg)
-				cmd("git push origin main")
+				cmd("git commit -am \"%s\"", msg)
 			task_done()
 		end
 
